@@ -23,7 +23,7 @@ public class Aluno {
 	public String Sala;
 
 	@Transient
-  private List<Nota> notas;
+  	private List<Nota> notas;
 
 	public String getId() {
 		return id;

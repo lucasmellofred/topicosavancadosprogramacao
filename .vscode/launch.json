@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-NotasalunosprofessorApplication<notasalunosprofessor>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.tpar.notasalunosprofessor.NotasalunosprofessorApplication",
+            "projectName": "notasalunosprofessor",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

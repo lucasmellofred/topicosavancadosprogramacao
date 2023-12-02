@@ -3,6 +3,7 @@ package com.tpar.notasalunosprofessor.controller;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.tpar.notasalunosprofessor.entity.Aluno;
+import com.tpar.notasalunosprofessor.entity.Professor;
 import com.tpar.notasalunosprofessor.service.AlunoService;
+
+import io.dapr.Topic;
+import io.dapr.client.domain.CloudEvent;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
@@ -24,9 +29,7 @@ public class AlunoController {
 	@GetMapping
 	public ResponseEntity<List<Aluno>> listaAlunos(){
 		var listaAlunos = service.getAll();
-		return 
-			new ResponseEntity<List<Aluno>>
-			(listaAlunos, HttpStatus.OK);
+		return new ResponseEntity<List<Aluno>>(listaAlunos, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
@@ -35,9 +38,7 @@ public class AlunoController {
 		if(aluno == null){
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return 
-			new ResponseEntity<Aluno>
-			(aluno, HttpStatus.OK);
+		return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
 	}
 
 	@PostMapping
@@ -46,11 +47,9 @@ public class AlunoController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		aluno = service.save(aluno);
-		return 
-			new ResponseEntity<Aluno>
-
-			(aluno, HttpStatus.OK);
+		return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
 	}
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Aluno> atualizarAluno(@PathVariable("id")  String id, @RequestBody Aluno aluno){
 		if(aluno == null || id == ""  || id == null){
@@ -60,9 +59,7 @@ public class AlunoController {
 		if(aluno == null){
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return 
-			new ResponseEntity<Aluno>
-			(aluno, HttpStatus.OK);
+		return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
@@ -74,8 +71,14 @@ public class AlunoController {
 		if(aluno == null){
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return 
-			new ResponseEntity<Aluno>
-			(aluno, HttpStatus.OK);
+		return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
 	}
+
+	@Topic(name = "${app.component.topic.aluno}", pubsubName = "${app.component.service}")
+    @PostMapping(path = "/event", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<Aluno> atualizarAluno(@RequestBody(required = false) CloudEvent<Aluno> cloudEvent){
+        var aluno = service.update(cloudEvent.getData());
+        System.out.println("EVENT" + aluno.getNome());
+        return new ResponseEntity<Aluno>(aluno, HttpStatus.OK);
+    }   
 }

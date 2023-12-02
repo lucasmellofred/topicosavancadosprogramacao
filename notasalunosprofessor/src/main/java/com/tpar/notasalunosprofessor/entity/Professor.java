@@ -22,6 +22,7 @@ public class Professor {
 	public String Turma;
 	public String Turno;
 	public String Curso;
+	public String alunoId;
 
 	@Transient
 	private List<Nota> notas;
@@ -73,5 +74,18 @@ public class Professor {
 	}
 	public void setCurso(String curso) {
 		Curso = curso;
+	}
+	public String getAlunoId() {
+		return alunoId;
+	}
+	public void setAlunoId(String alunoId) {
+		this.alunoId = alunoId;
+	}
+	public List<Nota> getNotas() {
+		return notas;
+	}
+	public void setNotas(List<Nota> notas) {
+		this.notas = notas;
 	}	
+	
 }

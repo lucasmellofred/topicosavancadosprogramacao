@@ -10,5 +10,6 @@ public interface AlunoService {
 	public Aluno getById(String id);
 	public Aluno save(Aluno aluno);
 	public Aluno update(String id, Aluno aluno);
+	public Aluno update(Aluno aluno);
 	public Aluno delete(String id);
 }

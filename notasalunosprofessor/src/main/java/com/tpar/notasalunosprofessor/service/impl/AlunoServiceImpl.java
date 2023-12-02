@@ -3,16 +3,35 @@ package com.tpar.notasalunosprofessor.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.tpar.notasalunosprofessor.entity.Aluno;
 import com.tpar.notasalunosprofessor.repository.AlunoRepository;
 import com.tpar.notasalunosprofessor.service.AlunoService;
+
+import io.dapr.client.DaprClient;
+import io.dapr.client.DaprClientBuilder;
 
 @Service
 public class AlunoServiceImpl implements AlunoService {
 
 	@Autowired
 	private AlunoRepository repository;
+
+	private DaprClient client = new DaprClientBuilder().build();
+    @Value("${app.component.topic.aluno}")
+    private String TOPIC_NAME;
+    @Value("${app.component.service}")
+	private String PUBSUB_NAME;
+
+	//método privado para publicar a atualização
+    private void publicarAtualizacao(Aluno aluno){
+        client.publishEvent(
+					PUBSUB_NAME,
+					TOPIC_NAME,
+					aluno).block();
+    }
+
 
 	@Override
 	public List<Aluno> getAll() {
@@ -32,6 +51,15 @@ public class AlunoServiceImpl implements AlunoService {
 		return null;
 	}
 
+	/*Override
+	public Aluno save(Aluno aluno) {
+		aluno.setId(null);
+		//return repository.save(aluno);
+		aluno = repository.save(aluno);
+		publicarAtualizacao(aluno);
+		return aluno;
+	}*/
+
 	@Override
 	public Aluno save(Aluno aluno) {
 		aluno.setId(null);
@@ -41,7 +69,7 @@ public class AlunoServiceImpl implements AlunoService {
 	@Override
 	public Aluno update(String id, Aluno aluno) {
 		var buscaAlunoAntigo = repository.findById(id);
-		if (buscaAlunoAntigo.isPresent()){
+		/*if (buscaAlunoAntigo.isPresent()){
 			var alunoAntigo = buscaAlunoAntigo.get();
 
 			alunoAntigo.setNome(aluno.getNome());
@@ -52,7 +80,16 @@ public class AlunoServiceImpl implements AlunoService {
 			alunoAntigo.setSala(aluno.getSala());
 			
 			return repository.save(alunoAntigo);
-		}
+		}*/
+		if (buscaAlunoAntigo.isPresent()){
+            var alunoAntigo = buscaAlunoAntigo.get();
+
+            //Atualizar cada atributo do objeto antigo 
+            alunoAntigo.setNome(aluno.getNome());
+            alunoAntigo = repository.save(alunoAntigo);
+            publicarAtualizacao(alunoAntigo);
+            return alunoAntigo;
+        }
 		return null;
 	}
 
@@ -67,5 +104,10 @@ public class AlunoServiceImpl implements AlunoService {
 			return aluno;
 		}
 		return null;
+	}
+
+	@Override
+	public Aluno update(Aluno aluno) {
+		return repository.save(aluno);
 	}
 }
